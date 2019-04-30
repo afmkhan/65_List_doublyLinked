@@ -5,7 +5,7 @@
 public class List_inChainOfNodes{
     private Node headSentinel;
 
-     
+
     /**
       Construct an empty list
      */
@@ -29,21 +29,40 @@ public class List_inChainOfNodes{
     }
 
 
-     /**
-       @return a string representation of this list,
-       format:
-           # elements [element0,element1,element2,]
-      */
-    public String toString() {
-        String stringRep = size() + " elements [";
+     // /**
+       // @return a string representation of this list,
+       // format:
+           // # elements [element0,element1,element2,]
+      // */
+    // public String toString() {
+        // String stringRep = size() + " elements [";
 
-        for( Node node = headSentinel.getNextNode()
-           ; node != null
-           ; node = node.getNextNode() )
-            stringRep += node.getCargo() + ",";
+        // for( Node node = headSentinel.getNextNode()
+           // ; node != null
+           // ; node = node.getNextNode() )
+            // stringRep += node.getCargo() + ",";
+        // return stringRep + "]";
+    // }
+
+    /**
+      Demo use of links to previous Nodes.
+
+      @return a string representation of this list,
+              iterating through the list
+              from tail to head.
+      format, using ` as separator
+          [element0`element1`element2`]
+     */
+    public String toString() {
+        String stringRep = "tail-first [";
+
+        for( Node node = getNodeBefore( size())
+            ; node != headSentinel
+            ; node = node.getPreviousNode()
+           )
+            stringRep += node.getCargo() + "`";
         return stringRep + "]";
     }
-
 
     /**
       Append @value to the head of this list.
@@ -51,8 +70,13 @@ public class List_inChainOfNodes{
       @return true, in keeping with conventions yet to be discussed
      */
      public boolean addAsHead( Object val) {
-        headSentinel.setNextNode(
-          new Node( val, headSentinel.getNextNode()));
+        Node newHead = new Node (val, headSentinel, headSentinel.getNextNode());
+        Node formerHead =
+            headSentinel.setNextNode( newHead);
+        
+        // update previous node of formerHead
+        if( formerHead != null) formerHead.setPreviousNode( newHead);
+        
         return true;
      }
 
@@ -64,7 +88,7 @@ public class List_inChainOfNodes{
     private Node getNodeBefore( int index) {
         /* iterate through the chain, up to the node
            that holds a reference to the desired node */
-           
+
         Node node;
         int upTo;  // comma operator precludes declaration in FOR
         for( upTo = 0   , node = headSentinel
@@ -115,11 +139,16 @@ public class List_inChainOfNodes{
       (that is, increase the index associated with each).
      */
     public boolean add( int index, Object value) {
-        Node newNode = new Node( value);
+        Node beforeNew = getNodeBefore(index);
+        Node newNode = new Node( value, beforeNew, null);
         Node afterNew = /* the node that should follow newNode
           in the augmented list */
-          getNodeBefore( index).setNextNode( newNode);
+          beforeNew.setNextNode( newNode);
         newNode.setNextNode( afterNew);
+
+        // update the ref to prev node
+        newNode.setPreviousNode(beforeNew);
+        if (afterNew != null) afterNew.setPreviousNode(newNode);
         return true;
     }
 
@@ -136,7 +165,12 @@ public class List_inChainOfNodes{
         Node before = getNodeBefore( index);
         Node ax = before.getNextNode();
         Object saveForReturn = ax.getCargo();
-        before.setNextNode( ax.getNextNode());
+        Node afterAx = ax.getNextNode();
+        
+        //update prev Node references
+        before.setNextNode( afterAx);
+        if (afterAx != null) afterAx.setPreviousNode( before);
+        
         return saveForReturn;
     }
 }

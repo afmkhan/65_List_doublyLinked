@@ -1,1 +1,1 @@
-# represent a list as a chain with a sentinel node
+# 65_List_doublyLinked
